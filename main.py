@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 all_link = []       # Suitable link list
 all_search = []     # Search in single link
+more_specific = []  # Save completed info
 
 
 def count_word(string1, string2):
@@ -30,20 +31,19 @@ def crawling(url, depth):
         soup = BeautifulSoup(r.text, 'lxml')
         links = soup.find_all('a')
         title = soup.find('title').text.strip()
-        print(f"{title} --Url: {url}, at depth: {depth}")
+        # print(f"{title} --Url: {url}, at depth: {depth}")
     except Exception as e:
         print(e)
         return
 
     description = soup.get_text()
     search_page = count_word(description, Search_box)
-    print(f"Found {search_page} results")
+    # print(f"Found {search_page} results")
+    more_specific.append([search_page, title, url])
 
     # Check if reach specific depth
     if depth == 0:
-        # print("Code completed")
         return
-    # print("Loop begin")
 
     # Check and fix every single link
     for link in links:
@@ -101,7 +101,7 @@ def crawling(url, depth):
             pass
 
     # Output count and depth
-    print(f"Total invalid: {nothing_count + len(repeat_link)}. Depth: {depth}\n")
+    # print(f"Total invalid: {nothing_count + len(repeat_link)}. Depth: {depth}\n")
     return
 
 
@@ -113,6 +113,16 @@ Search_box = "Stardew valley"
 
 # Start first crawl
 crawling(start_url, Depth_crawl)
+more_specific.sort(reverse=True)
+for Result, Title, Url in more_specific:
+    print(f"{Title} | URL: {Url}")
+    if Result == 0:
+        print("Found nothing")
+    elif Result == 1:
+        print("Found 1 result")
+    else:
+        print(f"Found {Result} results")
 print(f"\n***Total link: {len(all_link)}")
+print(f"***Specific length: {len(more_specific)}")
 
 print("Code done!!!")
